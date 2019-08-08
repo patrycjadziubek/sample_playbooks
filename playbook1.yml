@@ -1,41 +1,20 @@
 ---
 - name: Ensure apache is installed and started
   hosts: slaves
-  become: no  
-  vars:
-    httpd_packages:
-      - httpd
-      - mod_wsgi
-    apache_test_message: "Test"
-    apache_webserver_port: 80
-    apache_max_keep_alive_requests: 101
+  become: no
 
   tasks:
-  - name: Ensure httpd packages are installed
+  - name: Ensure httpd package is installed present
     yum:
-      name: "{{ httpd_packages }}"
+      name: httpd
       state: present
-    notify: restart-apache-service
-
-  - name: Ensure latest httpd.conf is present
-    template:
-      src: templates/httpd.conf.j2
-      dest: /etc/httpd/conf/httpd.conf
-    notify: restart-apache-service
-   
+    
   - name: Ensure latest index.html file is present
-    template:
-      src: templates/index.html.j2
-      dest: /var/www/html/index.html
+    copy:
+      src: files/index.html
+      dest: /var/www/html/
 
   - name: Ensure httpd is started
     service:
       name: httpd
       state: started
-      enabled: yes
-
-  handlers: 
-  - name: restart-apache-service
-    service: 
-      name: httpd
-      state: restarted
